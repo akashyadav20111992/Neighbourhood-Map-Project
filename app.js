@@ -1,8 +1,9 @@
 //https://discussions.udacity.com/t/filtering-my-list-of-locations-with-ko/38858
 //https://discussions.udacity.com/t/triggering-marker-bounce-w-list-binding/41089/6
 //https://developers.google.com/maps/documentation/javascript/examples/marker-animations
-//https://developer.mozilla.org/en/docs/Web/API/GlobalEventHandlers/onerror
+//https://discussions.udacity.com/t/handling-google-maps-in-async-and-fallback/34282#onerror
 var map;
+//hard coded locations
 var locations = [
   {id : 1 , title: "Home", location: {lat: 28.159818, lng: 76.813626}},
   {id : 2 , title: "Cinema", location: {lat: 28.191354, lng: 76.813860}},
@@ -31,7 +32,7 @@ function initMap() {
     var position = locations[i].location;
     var title = locations[i].title;
     // Create a marker per location, and put into markers array.
-     var marker = new google.maps.Marker({
+    var marker = new google.maps.Marker({
       map : map,
       position : position,
       title : title,
@@ -41,20 +42,19 @@ function initMap() {
     // Push the marker to our array of markers.
     markers.push(marker);
     bounds.extend(markers[i].position);
-    // Create an onclick event to open an infowindow at each marker.
+    // Create an onclick event to open an infowindow and add bounce at each marker.
     marker.addListener('click', function() {
       populateInfoWindow(this, largeInfowindow);
       bounce(this);
     });
   }
   map.fitBounds(bounds);
-  //document.getElementById('show-listings').addEventListener('click', showListings);
-  //document.getElementById('hide-listings').addEventListener('click', hideListings);
 }
 
 // This function populates the infowindow when the marker is clicked. We'll only allow
 // one infowindow which will open at the marker that is clicked, and populate based
 // on that markers position.
+//Also loads wiki links to infowindow
 function populateInfoWindow(marker, infowindow) {
   // Check to make sure the infowindow is not already opened on this marker.
   if (infowindow.marker != marker) {
@@ -79,9 +79,6 @@ function populateInfoWindow(marker, infowindow) {
         clearTimeout(wikiRequestTimeout);
       }
     });
-    //console.log(abc);
-
-
     infowindow.open(map, marker);
     // Make sure the marker property is cleared if the infowindow is closed.
     infowindow.addListener('closeclick', function() {
@@ -89,30 +86,18 @@ function populateInfoWindow(marker, infowindow) {
     });
   }
 }
+//makes the marker bounce on click
 function bounce(marker){
   marker.setAnimation(google.maps.Animation.BOUNCE);
   setTimeout(function(){
     marker.setAnimation(null);
   }, 3000);
 }
-
-// This function will loop through the markers array and display them all.
-/*function showListings() {
-  var bounds = new google.maps.LatLngBounds();
-  // Extend the boundaries of the map for each marker and display the marker
-  for (var i = 0; i < markers.length; i++) {
-    markers[i].setMap(map);
-    bounds.extend(markers[i].position);
-  }
-  map.fitBounds(bounds);
+//handles the google map api error
+googleError = function(){
+  $("#map").append("<p>unable to load google map</p>");
 }
-
-// This function will loop through the listings and hide them all.
-function hideListings() {
-  for (var i = 0; i < markers.length; i++) {
-    markers[i].setMap(null);
-  }
-}*/
+// ViewModel of knockout
 var ViewModel = function(){
   var self = this;
   this.listings = ko.observableArray();
@@ -120,6 +105,8 @@ var ViewModel = function(){
   for(var i=0;i<locations.length;i++){
     this.listings.push(locations[i]);
   }
+  //search the typed string in filterBar within list of titles of locations
+  //and makes them visible or invisible
   this.search = function(typed){
     self.listings([]);
     for(var i=0;i<locations.length;i++){
@@ -133,6 +120,7 @@ var ViewModel = function(){
     }
   }
   this.filterBar.subscribe(self.search);
+  //this makes the marker on map to bounce and open infowindow while it is clicked on the list
   this.listHitMarker = function(){
     for(var i=0;i<locations.length;i++){
       if(locations[i].id === this.id){
@@ -142,22 +130,3 @@ var ViewModel = function(){
   }
 }
 ko.applyBindings(new ViewModel());
-window.onerror = function (msg, url, lineNo, columnNo, error) {
-    var string = msg.toLowerCase();
-    var substring = "script error";
-    if (string.indexOf(substring) > -1){
-        alert('Script Error: See Browser Console for Detail');
-    } else {
-        var message = [
-            'Message: ' + msg,
-            'URL: ' + url,
-            'Line: ' + lineNo,
-            'Column: ' + columnNo,
-            'Error object: ' + JSON.stringify(error)
-        ].join(' - ');
-
-        alert(message);
-    }
-
-    return false;
-};
