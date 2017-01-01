@@ -1,0 +1,27 @@
+<!--http://knockoutjs.com/documentation/value-binding.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="filter-sidebar">
+      <h1>Find your destination</h1>
+      <input type = "text" data-bind = "value:filterBar , valueUpdate:'input'"></input>
+      <div data-bind = "foreach : listings">
+        <li data-bind = "text : title , click:$parent.listHitMarker"></li>
+      </div>
+    </div>
+    <div id="map"></div>
+  </div>
+  <script src = "knockout.js"></script>
+  <script src="jquery.min.js"></script>
+  <script src = "app.js"></script>
+  <script async defer src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDHOkyuxAuMwGga9bb8kBAXvT7ecawJATk&v=3&callback=initMap"></script>
+</body>
+</html>
